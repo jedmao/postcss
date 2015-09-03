@@ -83,29 +83,40 @@ describe('AtRule', () => {
 
     describe('deprecation warnings', () => {
 
-        sinon.spy(console, 'warn');
+        // sinon.spy(console, 'warn');
 
-        afterEach(() => {
-            console.warn.reset();
-        });
+        // afterEach(() => {
+        //     console.warn.reset();
+        // });
 
-        after(() => {
-            console.warn.restore();
-        });
+        // after(() => {
+        //     console.warn.restore();
+        // });
 
         it('warns afterName getter is deprecated', () => {
+            const spy = sinon.spy(console, 'warn');
             const rule = new AtRule();
             rule.afterName;
-            expect(console.warn).to.have.been.calledOnce.and.calledWithExactly(
+            expect(spy).to.have.been.calledOnce.and.calledWithExactly(
                 'AtRule#afterName was deprecated. Use AtRule#raws.afterName');
+            spy.restore();
         });
 
         it('warns afterName setter is deprecated', () => {
+            const spy = sinon.spy(console, 'warn');
             const rule = new AtRule();
             rule.afterName = 'foo';
-            expect(console.warn).to.have.been.calledOnce.and.calledWithExactly(
+            expect(spy).to.have.been.calledOnce.and.calledWithExactly(
                 'AtRule#afterName was deprecated. Use AtRule#raws.afterName');
+            spy.restore();
         });
+
+        // it('warns afterName setter is deprecated', () => {
+        //     const rule = new AtRule();
+        //     rule.afterName = 'foo';
+        //     expect(console.warn).to.have.been.calledOnce.and.calledWithExactly(
+        //         'AtRule#afterName was deprecated. Use AtRule#raws.afterName');
+        // });
 
         // it('warns afterName(val) is deprecated', () => {
         //     new AtRule().afterName('foo');
