@@ -5,10 +5,6 @@ export default class AtRule extends Container {
 
     type = 'atrule'
 
-    constructor(defaults) {
-        super(defaults);
-    }
-
     append(...children) {
         if ( !this.nodes ) this.nodes = [];
         return super.append(...children);
