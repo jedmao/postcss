@@ -1,17 +1,36 @@
+﻿import Declaration from './declaration';
 import PreviousMap from './previous-map';
 import Stringifier from './stringifier';
-import _vendor from './vendor';
-import _list from './list';
+import _stringify  from './stringify';
+import Processor   from './processor';
+import Comment     from './comment';
+import _vendor     from './vendor';
+import AtRule      from './at-rule';
+import _parse      from './parse';
+import _list       from './list';
+import Rule        from './rule';
+import Root        from './root';
+
 /**
  * @param plugins Can also be included with the Processor#use method.
  * @returns A processor that will apply plugins as CSS processors.
  */
-declare function postcss(plugins?: (typeof postcss.acceptedPlugin)[]): postcss.Processor;
-declare function postcss(...plugins: (typeof postcss.acceptedPlugin)[]): postcss.Processor;
-declare module postcss {
-    var acceptedPlugin: Plugin<any> | Transformer | {
-        postcss: TransformCallback | Processor;
-    } | Processor;
+// ReSharper disable RedundantQualifier
+function postcss(plugins?: (typeof postcss.acceptedPlugin)[]): postcss.Processor;
+function postcss(...plugins: (typeof postcss.acceptedPlugin)[]): postcss.Processor;
+function postcss(...plugins: any[]): postcss.Processor {
+// ReSharper restore RedundantQualifier
+    if ( plugins.length === 1 && Array.isArray(plugins[0]) ) {
+        plugins = plugins[0];
+    }
+    return new Processor(plugins);
+}
+
+// ReSharper disable once InconsistentNaming
+module postcss {
+
+    export var acceptedPlugin: Plugin<any>|Transformer|{ postcss: TransformCallback|Processor }|Processor;
+
     /**
      * Creates a PostCSS plugin with a standard API.
      * @param name Plugin name. Same as in name property in package.json. It will
@@ -19,84 +38,133 @@ declare module postcss {
      * @param initializer Will receive plugin options and should return functions
      * to modify nodes in input CSS.
      */
-    function plugin<T>(name: string, initializer: PluginInitializer<T>): Plugin<T>;
-    interface Plugin<T> extends Transformer {
+    export function plugin<T>(name: string, initializer: PluginInitializer<T>): Plugin<T> {
+        let creator: any = function() {
+            const transformer: Transformer = initializer.apply(this, arguments);
+            transformer.postcssPlugin = name;
+            transformer.postcssVersion = (new Processor()).version;
+            return transformer;
+        };
+
+        creator.postcss = creator();
+        /**
+         * Equivalent to postcss([ somePlugin(options) ]).process(css);
+         */
+        creator.process = (
+            css: string|{ toString(): string; }|Result,
+            options?: T
+        ) => {
+            return postcss( [creator(options)] ).process(css, options);
+        };
+        return creator;
+    }
+
+    export interface Plugin<T> extends Transformer {
         (opts?: T): Transformer;
         postcss: Transformer;
-        process: (css: string | {
-            toString(): string;
-        } | Result, opts?: any) => LazyResult;
+        process: (
+            css: string|{ toString(): string; }|Result,
+            opts?: any
+        ) => LazyResult;
     }
-    interface Transformer extends TransformCallback {
+
+    export interface Transformer extends TransformCallback {
         postcssPlugin?: string;
         postcssVersion?: string;
     }
-    interface TransformCallback {
+
+    export interface TransformCallback {
         /**
          * @returns Asynchronous plugins should return a promise.
          */
-        (root: Root, result?: Result): void | Function | any;
+        (root: Root, result?: Result): void|Function|any;
     }
-    interface PluginInitializer<T> {
+
+    export interface PluginInitializer<T> {
         (pluginOptions?: T): Transformer;
     }
+
     /**
      * Contains the Vendor module, which contains helpers for working with
      * vendor prefixes.
      */
-    var vendor: typeof _vendor;
+    export var vendor = _vendor;
+
     /**
      * Default function to convert a node tree into a CSS string.
      */
-    function stringify(node: Node, builder: Stringifier.Builder): void;
+    export function stringify(node: Node, builder: Stringifier.Builder) {
+        return _stringify(<any>node, builder);
+    }
+
     /**
      * Parses source CSS.
      * @param css The CSS to parse.
      * @param options
      * @returns {} A new Root node, which contains the source CSS nodes.
      */
-    function parse(css: string | {
-        toString(): string;
-    } | LazyResult | Result, options?: {
-        from?: string;
-        map?: postcss.SourceMapOptions;
-    }): Root;
+    export function parse(
+        css: string|{ toString(): string; }|LazyResult|Result,
+        options?: {
+            from?: string;
+            map?: postcss.SourceMapOptions;
+        }
+    ): Root {
+        return _parse(css, options);
+    }
+
     /**
      * Contains the List module, which contains helpers for safely splitting
      * lists of CSS values, preserving parentheses and quotes.
      */
-    var list: typeof _list;
+    export var list = _list;
+
     /**
      * Creates a new Comment node.
      * @param defaults Properties for the new Comment node.
      * @returns The new node.
      */
-    function comment(defaults?: CommentNewProps): Comment;
+    export function comment(defaults?: CommentNewProps): Comment {
+        return new Comment(defaults);
+    }
+
     /**
      * Creates a new AtRule node.
      * @param defaults Properties for the new AtRule node.
      * @returns The new node.
      */
-    function atRule(defaults?: AtRuleNewProps): AtRule;
+    export function atRule(defaults?: AtRuleNewProps): AtRule {
+        return new AtRule(defaults);
+    }
+
     /**
      * Creates a new Declaration node.
      * @param defaults Properties for the new Declaration node.
      * @returns The new node.
      */
-    function decl(defaults?: DeclarationNewProps): Declaration;
+    export function decl(defaults?: DeclarationNewProps): Declaration {
+        return new Declaration(defaults);
+    }
+
     /**
      * Creates a new Rule node.
      * @param defaults Properties for the new Rule node.
      * @returns The new node.
      */
-    function rule(defaults?: RuleNewProps): Rule;
+    export function rule(defaults?: RuleNewProps): Rule {
+        return new Rule(defaults);
+    }
+
     /**
      * Creates a new Root node.
      * @param defaults Properties for the new Root node.
      * @returns The new node.
      */
-    function root(defaults?: Object): Root;
-    interface SourceMapOptions {
+    export function root(defaults?: Object): Root {
+        return new Root(defaults);
+    }
+
+    export interface SourceMapOptions {
         /**
          * Indicates that the source map should be embedded in the output CSS as a
          * Base64-encoded comment. By default, it is true. But if all previous maps
@@ -132,7 +200,7 @@ declare module postcss {
          *
          * If you have set inline: true, annotation cannot be disabled.
          */
-        annotation?: boolean | string;
+        annotation?: boolean|string;
         /**
          * If true, PostCSS will try to correct any syntax errors that it finds in the CSS.
          * This is useful for legacy code filled with hacks. Another use-case is interactive
@@ -140,12 +208,13 @@ declare module postcss {
          */
         safe?: boolean;
     }
+
     /**
      * A Processor instance contains plugins to process CSS. Create one
      * Processor  instance, initialize its plugins, and then use that instance
      * on numerous CSS files.
      */
-    interface Processor {
+    export interface Processor {
         /**
          * Adds a plugin to be used as a CSS processor. Plugins can also be
          * added by passing them as arguments when creating a postcss instance.
@@ -159,9 +228,10 @@ declare module postcss {
          * stream. If a Result instance is passed the processor will take the
          * existing Root parser from it.
          */
-        process(css: string | {
-            toString(): string;
-        } | Result, options?: ProcessOptions): LazyResult;
+        process(
+            css: string|{ toString(): string; }|Result,
+            options?: ProcessOptions
+        ): LazyResult;
         /**
          * Contains plugins added to this processor.
          */
@@ -171,7 +241,8 @@ declare module postcss {
          */
         version: string;
     }
-    interface ProcessOptions extends Syntax {
+
+    export interface ProcessOptions extends Syntax {
         /**
          * The path of the CSS source file. You should always set from, because it is
          * used in source map generation and syntax error messages.
@@ -191,13 +262,14 @@ declare module postcss {
         /**
          * Function to generate AST by string.
          */
-        parser?: Parse | Syntax;
+        parser?: Parse|Syntax;
         /**
          * Class to generate string by AST.
          */
-        stringifier?: Stringify | Syntax;
+        stringifier?: Stringify|Syntax;
     }
-    interface Syntax {
+
+    export interface Syntax {
         /**
          * Function to generate AST by string.
          */
@@ -207,26 +279,32 @@ declare module postcss {
          */
         stringify?: Stringify;
     }
-    interface Parse {
+
+    export interface Parse {
         (css?: string, opts?: postcss.SourceMapOptions): Root;
     }
-    interface Stringify {
-        (node?: postcss.Node, builder?: any): postcss.Result | void;
+
+    export interface Stringify {
+        (node?: postcss.Node, builder?: any): postcss.Result|void;
     }
+
     /**
      * A promise proxy for the result of PostCSS transformations.
      */
-    interface LazyResult {
+    export interface LazyResult {
         /**
          * Processes input CSS through synchronous and asynchronous plugins.
          * @param onRejected Called if any plugin throws an error.
          */
-        then(onFulfilled: (result: Result) => void, onRejected?: (error: Error) => void): Function | any;
+        then(
+            onFulfilled: (result: Result) => void,
+            onRejected?: (error: Error) => void
+        ): Function|any;
         /**
          * Processes input CSS through synchronous and asynchronous plugins.
          * @param onRejected Called if any plugin throws an error.
          */
-        catch(onRejected: (error: Error) => void): Function | any;
+        catch(onRejected: (error: Error) => void): Function|any;
         /**
          * Alias for css property.
          */
@@ -279,10 +357,11 @@ declare module postcss {
          */
         opts: ResultOptions;
     }
+
     /**
      * Provides the result of the PostCSS transformations.
      */
-    interface Result {
+    export interface Result {
         /**
          * Alias for css property.
          */
@@ -336,7 +415,8 @@ declare module postcss {
          */
         opts: ResultOptions;
     }
-    interface ResultOptions extends ProcessOptions {
+
+    export interface ResultOptions extends ProcessOptions {
         /**
          * The CSS node that was the source of the warning.
          */
@@ -347,7 +427,8 @@ declare module postcss {
          */
         plugin?: string;
     }
-    interface ResultMap {
+
+    export interface ResultMap {
         /**
          * Add a single mapping from original source line and column to the generated
          * source's line and column for this source map being created. The mapping
@@ -359,11 +440,11 @@ declare module postcss {
             generated: {
                 line: number;
                 column: number;
-            };
+            },
             original: {
                 line: number;
                 column: number;
-            };
+            },
             /**
              * The original source file (relative to the sourceRoot).
              */
@@ -392,7 +473,7 @@ declare module postcss {
          * If omitted, it is assumed that both SourceMaps are in the same directory;
          * thus, not needing any rewriting (Supplying '.' has the same effect).
          */
-        applySourceMap(sourceMapConsumer: any, sourceFile?: string, sourceMapPath?: string): void;
+        applySourceMap(sourceMapConsumer, sourceFile?: string, sourceMapPath?: string): void;
         /**
          * Renders the source map being generated to JSON.
          */
@@ -402,16 +483,18 @@ declare module postcss {
          */
         toString: () => string;
     }
-    interface ResultMessage {
+
+    export interface ResultMessage {
         type: string;
         text?: string;
         plugin?: string;
         browsers?: string[];
     }
+
     /**
      * Represents a plugin warning. It can be created using Result#warn().
      */
-    interface Warning {
+    export interface Warning {
         /**
          * @returns Error position, message.
          */
@@ -438,7 +521,8 @@ declare module postcss {
          */
         column: number;
     }
-    interface WarningOptions extends ResultOptions {
+
+    export interface WarningOptions extends ResultOptions {
         /**
          * A word inside a node's string that should be highlighted as source
          * of warning.
@@ -450,10 +534,11 @@ declare module postcss {
          */
         index?: number;
     }
+
     /**
      * The CSS parser throws this error for broken CSS.
      */
-    interface CssSyntaxError extends InputOrigin {
+    export interface CssSyntaxError extends InputOrigin {
         name: string;
         /**
          * @returns Error position, message and source code of broken part.
@@ -483,7 +568,8 @@ declare module postcss {
         plugin?: string;
         input?: InputOrigin;
     }
-    interface InputOrigin {
+
+    export interface InputOrigin {
         /**
          * If parser's from option is set, contains the absolute path to the
          * broken file. PostCSS will use the input source map to detect the
@@ -521,10 +607,11 @@ declare module postcss {
          */
         source?: string;
     }
+
     /**
      * Represents the source CSS.
      */
-    interface Input {
+    export interface Input {
         /**
          * The absolute path to the CSS source file defined with the "from" option.
          */
@@ -551,7 +638,8 @@ declare module postcss {
          */
         origin(line: number, column: number): InputOrigin;
     }
-    interface Node {
+
+    export interface Node {
         /**
          * Returns a string representing the node's type. Possible values are
          * root, atrule, rule, decl or comment.
@@ -591,7 +679,9 @@ declare module postcss {
             /**
              * Error description.
              */
-            message: string, options?: NodeErrorOptions): CssSyntaxError;
+            message: string,
+            options?: NodeErrorOptions
+        ): CssSyntaxError;
         /**
          * Creates an instance of Warning and adds it to messages. This method is
          * provided as a convenience wrapper for Result#warn.
@@ -626,7 +716,7 @@ declare module postcss {
          * Inserts node(s) before the current node and removes the current node.
          * @returns This node for chaining.
          */
-        replaceWith(...nodes: (Node | Object)[]): Node;
+        replaceWith(...nodes: (Node|Object)[]): Node;
         /**
          * @param overrides New properties to override in the clone.
          * @returns A clone of this node. The node and its (cloned) children will
@@ -683,10 +773,12 @@ declare module postcss {
          */
         raw(prop: string, defaultType?: string): any;
     }
-    interface NodeNewProps {
+
+    export interface NodeNewProps {
         raws?: NodeRaws;
     }
-    interface NodeRaws {
+
+    export interface NodeRaws {
         /**
          * The space symbols before the node. It also stores `*` and `_`
          * symbols before the declaration (IE hack).
@@ -722,8 +814,9 @@ declare module postcss {
          * The content of important statement, if it is not just "!important".
          */
         important?: string;
-    }
-    interface NodeSource {
+    };
+
+    export interface NodeSource {
         input: Input;
         /**
          * The starting position of the node's source.
@@ -740,7 +833,8 @@ declare module postcss {
             line: number;
         };
     }
-    interface NodeErrorOptions {
+
+    export interface NodeErrorOptions {
         /**
          * Plugin name that created this error. PostCSS will set it automatically.
          */
@@ -756,7 +850,8 @@ declare module postcss {
          */
         index?: number;
     }
-    interface JsonNode {
+
+    export interface JsonNode {
         /**
          * Returns a string representing the node's type. Possible values are
          * root, atrule, rule, decl or comment.
@@ -782,11 +877,12 @@ declare module postcss {
          */
         raws?: NodeRaws;
     }
+
     /**
      * Containers can store any content. If you write a rule inside a rule,
      * PostCSS will parse it.
      */
-    interface Container extends Node {
+    export interface Container extends Node {
         /**
          * Returns the container's parent node.
          */
@@ -813,7 +909,7 @@ declare module postcss {
          * @param child Child of the current container.
          * @returns The child's index within the container's "nodes" array.
          */
-        index(child: Node | number): number;
+        index(child: Node|number): number;
         /**
          * Determines whether all child nodes satisfy the specified test.
          * @param callback A function that accepts up to three arguments. The
@@ -822,7 +918,10 @@ declare module postcss {
          * @returns True if the callback returns true for all of the container's
          * children.
          */
-        every(callback: (node: Node, index: number, nodes: Node[]) => any, thisArg?: any): boolean;
+        every(
+            callback: (node: Node, index: number, nodes: Node[]) => any,
+            thisArg?: any
+        ): boolean;
         /**
          * Determines whether the specified callback returns true for any child node.
          * @param callback A function that accepts up to three arguments. The some
@@ -834,7 +933,10 @@ declare module postcss {
          * @returns True if callback returns true for (at least) one of the
          * container's children.
          */
-        some(callback: (node: Node, index: number, nodes: Node[]) => boolean, thisArg?: any): boolean;
+        some(
+            callback: (node: Node, index: number, nodes: Node[]) => boolean,
+            thisArg ?: any
+        ): boolean;
         /**
          * Iterates through the container's immediate children, calling the
          * callback function for each child. If you need to recursively iterate
@@ -846,7 +948,7 @@ declare module postcss {
          * will adjust the current index to match the mutations.
          * @returns False if the callback returns false during iteration.
          */
-        each(callback: (node: Node, index: number) => any): boolean | void;
+        each(callback: (node: Node, index: number) => any): boolean|void;
         /**
          * Traverses the container's descendant nodes, calling `callback` for each
          * node. Like container.each(), this method is safe to use if you are
@@ -854,7 +956,7 @@ declare module postcss {
          * the container's immediate children, use container.each().
          * @param callback Iterator.
          */
-        walk(callback: (node: Node, index: number) => any): boolean | void;
+        walk(callback: (node: Node, index: number) => any): boolean|void;
         /**
          * Traverses the container's descendant nodes, calling `callback` for each
          * declaration. Like container.each(), this method is safe to use if you
@@ -863,8 +965,13 @@ declare module postcss {
          * declarations whose property matches propFilter will be iterated over.
          * @param callback Called for each declaration node within the container.
          */
-        walkDecls(propFilter: string | RegExp, callback?: (decl: Declaration, index: number) => any): boolean | void;
-        walkDecls(callback: (decl: Declaration, index: number) => any): boolean | void;
+        walkDecls(
+            propFilter: string|RegExp,
+            callback?: (decl: Declaration, index: number) => any
+        ): boolean|void;
+        walkDecls(
+            callback: (decl: Declaration, index: number) => any
+        ): boolean|void;
         /**
          * Traverses the container's descendant nodes, calling `callback` for each
          * at-rule. Like container.each(), this method is safe to use if you are
@@ -874,8 +981,13 @@ declare module postcss {
          * @param callback Iterator called for each at-rule node within the
          * container.
          */
-        walkAtRules(nameFilter: string | RegExp, callback: (atRule: AtRule, index: number) => any): boolean | void;
-        walkAtRules(callback: (atRule: AtRule, index: number) => any): boolean | void;
+        walkAtRules(
+            nameFilter: string|RegExp,
+            callback: (atRule: AtRule, index: number) => any
+        ): boolean|void;
+        walkAtRules(
+            callback: (atRule: AtRule, index: number) => any
+        ): boolean|void;
         /**
          * Traverses the container's descendant nodes, calling `callback` for each
          * rule. Like container.each(), this method is safe to use if you are
@@ -885,16 +997,26 @@ declare module postcss {
          * @param callback Iterator called for each rule node within the
          * container.
          */
-        walkRules(selectorFilter: string | RegExp, callback: (atRule: Rule, index: number) => any): boolean | void;
-        walkRules(callback: (atRule: Rule, index: number) => any): boolean | void;
-        walkRules(selectorFilter: any, callback?: (atRule: Rule, index: number) => any): boolean | void;
+        walkRules(
+            selectorFilter: string|RegExp,
+            callback: (atRule: Rule, index: number) => any
+        ): boolean|void;
+        walkRules(
+            callback: (atRule: Rule, index: number) => any
+        ): boolean|void;
+        walkRules(
+            selectorFilter: any,
+            callback?: (atRule: Rule, index: number) => any
+        ): boolean|void;
         /**
          * Traverses the container's descendant nodes, calling `callback` for each
          * comment. Like container.each(), this method is safe to use if you are
          * mutating arrays during iteration.
          * @param callback Iterator called for each comment node within the container.
          */
-        walkComments(callback: (comment: Comment, indexed: number) => any): void | boolean;
+        walkComments(
+            callback: (comment: Comment, indexed: number) => any
+        ): void|boolean;
         /**
          * Passes all declaration values within the container that match pattern
          * through the callback, replacing those values with the returned result of
@@ -906,28 +1028,31 @@ declare module postcss {
          * that will return a new value. The callback will receive the same
          * arguments as those passed to a function parameter of String#replace.
          */
-        replaceValues(pattern: string | RegExp, options: {
-            /**
-             * Property names. The method will only search for values that match
-             * regexp  within declarations of listed properties.
-             */
-            props?: string[];
-            /**
-             * Used to narrow down values and speed up the regexp search. Searching
-             * every single value with a regexp can be slow. If you pass a fast
-             * string, PostCSS will first check whether the value contains the fast
-             * string; and only if it does will PostCSS check that value against
-             * regexp. For example, instead of just checking for /\d+rem/ on all
-             * values, set fast: 'rem' to first check whether a value has the rem
-             * unit, and only if it does perform the regexp check.
-             */
-            fast?: string;
-        }, callbackOrReplaceValue: string | {
-            (substring: string, ...args: any[]): string;
-        }): Container;
-        replaceValues(pattern: string | RegExp, callbackOrReplaceValue: string | {
-            (substring: string, ...args: any[]): string;
-        }): Container;
+        replaceValues(
+            pattern: string|RegExp,
+            options: {
+                /**
+                 * Property names. The method will only search for values that match
+                 * regexp  within declarations of listed properties.
+                 */
+                props?: string[];
+                /**
+                 * Used to narrow down values and speed up the regexp search. Searching
+                 * every single value with a regexp can be slow. If you pass a fast
+                 * string, PostCSS will first check whether the value contains the fast
+                 * string; and only if it does will PostCSS check that value against
+                 * regexp. For example, instead of just checking for /\d+rem/ on all
+                 * values, set fast: 'rem' to first check whether a value has the rem
+                 * unit, and only if it does perform the regexp check.
+                 */
+                fast?: string;
+            },
+            callbackOrReplaceValue: string|{ (substring: string, ...args: any[]): string; }
+        ): Container;
+        replaceValues(
+            pattern: string|RegExp,
+            callbackOrReplaceValue: string|{ (substring: string, ...args: any[]): string; }
+        ): Container;
         /**
          * Inserts new nodes to the beginning of the container.
          * Because each node class is identifiable by unique properties, use the
@@ -959,19 +1084,19 @@ declare module postcss {
          * @param nodes New nodes.
          * @returns This container for chaining.
          */
-        append(...nodes: (Node | Object | string)[]): Container;
+        append(...nodes: (Node|Object|string)[]): Container;
         /**
          * Insert newNode before oldNode within the container.
          * @param oldNode Child or child's index.
          * @returns This container for chaining.
          */
-        insertBefore(oldNode: Node | number, newNode: Node | Object | string): Container;
+        insertBefore(oldNode: Node|number, newNode: Node|Object|string): Container;
         /**
          * Insert newNode after oldNode within the container.
          * @param oldNode Child or child's index.
          * @returns This container for chaining.
          */
-        insertAfter(oldNode: Node | number, newNode: Node | Object | string): Container;
+        insertAfter(oldNode: Node|number, newNode: Node|Object|string): Container;
         /**
          * Removes the container from its parent and cleans the parent property in the
          * container and its children.
@@ -984,7 +1109,7 @@ declare module postcss {
          * @param child Child or child's index.
          * @returns This container for chaining.
          */
-        removeChild(child: Node | number): Container;
+        removeChild(child: Node|number): Container;
         /**
          * Removes all children from the container and cleans their parent
          * properties.
@@ -992,17 +1117,20 @@ declare module postcss {
          */
         removeAll(): Container;
     }
-    interface ContainerNewProps extends NodeNewProps {
+
+    export interface ContainerNewProps extends NodeNewProps {
         /**
          * Contains the container's children.
          */
         nodes?: Node[];
         raws?: ContainerRaws;
     }
-    interface ContainerRaws extends NodeRaws {
+
+    export interface ContainerRaws extends NodeRaws {
         indent?: string;
     }
-    interface JsonContainer extends JsonNode {
+
+    export interface JsonContainer extends JsonNode {
         /**
          * Contains the container's children.
          */
@@ -1016,10 +1144,11 @@ declare module postcss {
          */
         last?: Node;
     }
+
     /**
      * Represents a CSS file and contains all its parsed nodes.
      */
-    interface Root extends Container {
+    export interface Root extends Container {
         /**
          * Inherited from Container. Should always be undefined for a Root node.
          */
@@ -1044,24 +1173,27 @@ declare module postcss {
         /**
          * Deprecated. Use Root#removeChild.
          */
-        remove(child?: Node | number): Root;
+        remove(child?: Node|number): Root;
         /**
          * Removes child from the root node, and the parent properties of node and
          * its children.
          * @param child Child or child's index.
          * @returns This root node for chaining.
          */
-        removeChild(child: Node | number): Root;
+        removeChild(child: Node|number): Root;
     }
-    interface RootNewProps extends ContainerNewProps {
+
+    export interface RootNewProps extends ContainerNewProps {
     }
-    interface JsonRoot extends JsonContainer {
+
+    export interface JsonRoot extends JsonContainer {
     }
+
     /**
      * Represents an at-rule. If it's followed in the CSS by a {} block, this
      * node will have a nodes property representing its children.
      */
-    interface AtRule extends Container {
+    export interface AtRule extends Container {
         /**
          * The identifier that immediately follows the @.
          */
@@ -1078,7 +1210,8 @@ declare module postcss {
          */
         clone(overrides?: Object): AtRule;
     }
-    interface AtRuleNewProps extends ContainerNewProps {
+
+    export interface AtRuleNewProps extends ContainerNewProps {
         /**
          * The identifier that immediately follows the @.
          */
@@ -1087,13 +1220,15 @@ declare module postcss {
          * These are the values that follow the at-rule's name, but precede any {}
          * block. The spec refers to this area as the at-rule's "prelude".
          */
-        params?: string | number;
+        params?: string|number;
         raws?: AtRuleRaws;
     }
-    interface AtRuleRaws extends NodeRaws {
+
+    export interface AtRuleRaws extends NodeRaws {
         params?: string;
     }
-    interface JsonAtRule extends JsonContainer {
+
+    export interface JsonAtRule extends JsonContainer {
         /**
          * The identifier that immediately follows the @.
          */
@@ -1104,10 +1239,11 @@ declare module postcss {
          */
         params?: string;
     }
+
     /**
      * Represents a CSS rule: a selector followed by a declaration block.
      */
-    interface Rule extends Container {
+    export interface Rule extends Container {
         /**
          * Returns the rule's parent node.
          */
@@ -1129,7 +1265,8 @@ declare module postcss {
          */
         clone(overrides?: Object): Rule;
     }
-    interface RuleNewProps extends ContainerNewProps {
+
+    export interface RuleNewProps extends ContainerNewProps {
         /**
          * The rule's full selector. If there are multiple comma-separated selectors,
          * the entire group will be included.
@@ -1142,14 +1279,16 @@ declare module postcss {
         selectors?: string[];
         raws?: RuleRaws;
     }
-    interface RuleRaws extends ContainerRaws {
-        /**
-        * The rule's full selector. If there are multiple comma-separated selectors,
-        * the entire group will be included.
-        */
+
+    export interface RuleRaws extends ContainerRaws {
+         /**
+         * The rule's full selector. If there are multiple comma-separated selectors,
+         * the entire group will be included.
+         */
         selector?: string;
     }
-    interface JsonRule extends JsonContainer {
+
+    export interface JsonRule extends JsonContainer {
         /**
          * The rule's full selector. If there are multiple comma-separated selectors,
          * the entire group will be included.
@@ -1161,10 +1300,11 @@ declare module postcss {
          */
         selectors?: string[];
     }
+
     /**
      * Represents a CSS declaration.
      */
-    interface Declaration extends Node {
+    export interface Declaration extends Node {
         /**
          * The declaration's property name.
          */
@@ -1187,7 +1327,8 @@ declare module postcss {
          */
         clone(overrides?: Object): Declaration;
     }
-    interface DeclarationNewProps {
+
+    export interface DeclarationNewProps {
         /**
          * The declaration's property name.
          */
@@ -1201,7 +1342,8 @@ declare module postcss {
         value?: string;
         raws?: DeclarationRaws;
     }
-    interface DeclarationRaws extends NodeRaws {
+
+    export interface DeclarationRaws extends NodeRaws {
         /**
          * The declaration's value. This value will be cleaned of comments.
          * If the source value contained comments, those comments will be
@@ -1210,18 +1352,20 @@ declare module postcss {
          */
         value?: string;
     }
-    interface JsonDeclaration extends JsonNode {
+
+    export interface JsonDeclaration extends JsonNode {
         /**
          * True if the declaration has an !important annotation.
          */
         important?: boolean;
     }
+
     /**
      * Represents a comment between declarations or statements (rule and at-rules).
      * Comments inside selectors, at-rule parameters, or declaration values will
      * be stored in the Node#raws properties.
      */
-    interface Comment extends Node {
+    export interface Comment extends Node {
         /**
          * The comment's text.
          */
@@ -1233,13 +1377,16 @@ declare module postcss {
          */
         clone(overrides?: Object): Comment;
     }
-    interface CommentNewProps {
+
+    export interface CommentNewProps {
         /**
          * The comment's text.
          */
         text?: string;
     }
-    interface JsonComment extends JsonNode {
+
+    export interface JsonComment extends JsonNode {
     }
 }
+
 export default postcss;

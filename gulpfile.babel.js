@@ -7,18 +7,41 @@ gulp.task('clean', () => {
 
 // Build
 
-gulp.task('build:lib', ['clean'], () => {
+gulp.task('build:lib', ['clean'], done => {
+    let trimLines = require('gulp-trimlines');
+    let rename = require('gulp-rename');
     let babel = require('gulp-babel');
-    return gulp.src('lib/*.es6')
-        .pipe(babel())
-        .pipe(gulp.dest('build/lib'));
+    let merge = require('event-stream').merge;
+    let filter = require('gulp-filter');
+    let ts = require('gulp-typescript');
+    let project = ts.createProject('tsconfig.json');
+    project.typescript = require('typescript');
+    let tsCompilerOptions = require('./tsconfig').compilerOptions;
+    let result = project.src().pipe(ts(project));
+    merge(
+        result.dts
+            .pipe(filter(['**', '!test-ts/**']))
+            .pipe(trimLines({ leading: false }))
+            .pipe(gulp.dest(tsCompilerOptions.outDir)),
+        result.js
+            .pipe(rename(path => {
+                path.extname = '.es6';
+            }))
+            .pipe(gulp.dest(tsCompilerOptions.outDir))
+    ).on('end', () => {
+        gulp.src('build/lib-ts/*.es6')
+            .pipe(babel({ loose: 'all' }))
+            .pipe(gulp.dest('build/lib'))
+            .on('end', done);
+    });
 });
 
 gulp.task('build:docs', ['clean'], () => {
     let ignore = require('fs').readFileSync('.npmignore').toString()
         .trim().split(/\n+/)
         .concat(['.npmignore', 'index.js', 'package.json',
-                 'lib/*', 'test/*', 'node_modules/**/*'])
+                 'lib/*', 'test/*', 'node_modules/**/*',
+                 'lib-ts/*', 'test-ts/*', 'typings/**'])
         .map( i => '!' + i );
     return gulp.src(['**/*'].concat(ignore))
         .pipe(gulp.dest('build'));
@@ -63,7 +86,7 @@ gulp.task('spellcheck', () => {
 gulp.task('test', () => {
     require('./');
     let mocha = require('gulp-mocha');
-    return gulp.src('test/*.es6', { read: false }).pipe(mocha());
+    return gulp.src('build/test-ts/*.es6', { read: false }).pipe(mocha());
 });
 
 gulp.task('integration', ['build:lib', 'build:package'], done => {
@@ -80,7 +103,7 @@ gulp.task('coverage:instrument', () => {
     require('./');
     let istanbul = require('gulp-istanbul');
     let isparta  = require('isparta');
-    return gulp.src('lib/*.es6')
+    return gulp.src('build/lib-ts/*.es6')
         .pipe(istanbul({
             includeUntested: true,
             instrumenter:    isparta.Instrumenter
@@ -92,7 +115,7 @@ gulp.task('coverage:instrument', () => {
 
 gulp.task('coverage:report', () => {
     let istanbul = require('gulp-istanbul');
-    return gulp.src('test/*.es6', { read: false })
+    return gulp.src('build/test-ts/*.es6', { read: false })
         .pipe(istanbul.writeReports({
             reporters: ['lcov', 'text-summary']
         }))
@@ -107,7 +130,7 @@ gulp.task('coverage:report', () => {
         }));
 });
 
-gulp.task('coverage', done => {
+gulp.task('coverage', ['build:lib', 'build:package'], done => {
     let runSequence = require('run-sequence');
     runSequence('coverage:instrument', 'test', 'coverage:report', done);
 });

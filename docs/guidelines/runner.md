@@ -39,7 +39,7 @@ module.exports = [
 
 To ensure that PostCSS generates source maps and displays better syntax errors,
 runners must specify the `from` and `to` options. If your runner does not handle
-writing to disk (for example, a gulp transform), you should set both options
+writing to disk (e.g., a gulp transform), you should set both options
 to point to the same file:
 
 ```js

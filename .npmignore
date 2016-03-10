@@ -10,6 +10,13 @@ test/
 .travis.yml
 appveyor.yml
 
+lib-ts/
+test-ts/
+typings/
+tsd.json
+tsconfig.json
+jsconfig.json
+
 gulpfile.babel.js
 
 coverage/
