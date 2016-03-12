@@ -1,31 +1,38 @@
 export default class Warning {
-
-    type = 'warning';
-
-    constructor(text, opts = { }) {
+    /**
+     * Represents a plugin warning. It can be created using Node#warn().
+     */
+    constructor(
+        /**
+         * Contains the warning message.
+         */
+        text, options = {}) {
         this.text = text;
-
-        if ( opts.node && opts.node.source ) {
-            let pos     = opts.node.positionBy(opts);
-            this.line   = pos.line;
+        /**
+         * Returns a string representing the node's type. Possible values are
+         * root, atrule, rule, decl or comment.
+         */
+        this.type = 'warning';
+        if (options.node && options.node.source) {
+            let pos = options.node.positionBy(options);
+            this.line = pos.line;
             this.column = pos.column;
         }
-
-        for ( let opt in opts ) this[opt] = opts[opt];
+        for (let opt in options)
+            this[opt] = options[opt];
     }
-
+    /**
+     * @returns Error position, message.
+     */
     toString() {
-        if ( this.node ) {
-            return this.node.error(this.text, {
-                plugin: this.plugin,
-                index:  this.index,
-                word:   this.word
-            }).message;
-        } else if ( this.plugin ) {
+        if (this.node) {
+            return this.node.error(this.text, { plugin: this.plugin }).message;
+        }
+        else if (this.plugin) {
             return this.plugin + ': ' + this.text;
-        } else {
+        }
+        else {
             return this.text;
         }
     }
-
 }
