@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import Declaration from '../lib-ts/declaration';
 import Warning     from '../lib-ts/warning';
 import parse       from '../lib-ts/parse';

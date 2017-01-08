@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import vendor from '../lib-ts/vendor';
 
 import { expect } from 'chai';

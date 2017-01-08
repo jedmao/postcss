@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import Declaration from '../lib-ts/declaration';
 import AtRule      from '../lib-ts/at-rule';
 import Input       from '../lib-ts/input';

@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import Processor from '../lib-ts/processor';
 import postcss   from '../lib-ts/postcss';
 

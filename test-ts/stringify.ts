@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import stringify from '../lib-ts/stringify';
 import parse     from '../lib-ts/parse';
 import Root      from '../lib-ts/root';

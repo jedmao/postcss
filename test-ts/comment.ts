@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import Comment from '../lib-ts/comment';
 import parse   from '../lib-ts/parse';
 

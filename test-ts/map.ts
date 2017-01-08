@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import PreviousMap from '../lib-ts/previous-map';
 import postcss     from '../lib-ts/postcss';
 import Rule        from '../lib-ts/rule';

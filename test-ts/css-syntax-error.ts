@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import CssSyntaxError from '../lib-ts/css-syntax-error';
 import postcss        from '../lib-ts/postcss';
 

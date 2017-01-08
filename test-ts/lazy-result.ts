@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import LazyResult from '../lib-ts/lazy-result';
 import Processor  from '../lib-ts/processor';
 

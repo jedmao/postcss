@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import LazyResult from '../lib-ts/lazy-result';
 import Warning    from '../lib-ts/warning';
 import postcss    from '../lib-ts/postcss';

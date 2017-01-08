@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import AtRule from '../lib-ts/at-rule';
 import parse  from '../lib-ts/parse';
 

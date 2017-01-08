@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import Result from '../lib-ts/result';
 import parse  from '../lib-ts/parse';
 

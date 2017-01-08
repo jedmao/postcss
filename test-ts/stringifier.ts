@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import Stringifier from '../lib-ts/stringifier';
 import Declaration from '../lib-ts/declaration';
 import postcss     from '../lib-ts/postcss';

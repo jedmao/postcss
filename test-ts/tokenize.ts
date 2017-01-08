@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import tokenize from '../lib-ts/tokenize';
 import Input    from '../lib-ts/input';
 

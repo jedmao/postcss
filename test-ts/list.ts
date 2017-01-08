@@ -1,4 +1,3 @@
-///<reference path="../typings/tsd.d.ts" />
 import list from '../lib-ts/list';
 
 import { expect } from 'chai';
