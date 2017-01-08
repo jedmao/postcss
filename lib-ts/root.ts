@@ -28,7 +28,7 @@ export default class Root extends Container implements postcss.Root {
      * have a clean parent and code style properties.
      */
     clone(overrides?: Object) {
-        return <Root>super.clone(overrides);
+        return super.clone(overrides);
     }
 
     toJSON() {
@@ -98,7 +98,7 @@ export default class Root extends Container implements postcss.Root {
     /**
      * Deprecated. Use Root#removeChild.
      */
-    remove(child?: Node|number): Root {
+    remove(child?: Node|number) {
         warnOnce('Root#remove is deprecated. Use Root#removeChild.');
         return this.removeChild(child);
     }

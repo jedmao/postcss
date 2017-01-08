@@ -320,7 +320,7 @@ export default class Parser {
 
         if ( this.current.parent ) {
             this.current.source.end = { line: token[2], column: token[3] };
-            this.current = this.current.parent;
+            this.current = <Container>this.current.parent;
         } else {
             this.unexpectedClose(token);
         }

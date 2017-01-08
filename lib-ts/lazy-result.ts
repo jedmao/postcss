@@ -147,7 +147,7 @@ export default class LazyResult implements postcss.LazyResult {
      * @param onRejected Called if any plugin throws an error.
      */
     then(
-        onFulfilled: (result: Result) => void,
+        onFulfilled: (result: postcss.Result) => void,
         onRejected?: (error: Error) => void
     ): Function|any {
         return this.async().then(onFulfilled, onRejected);
@@ -287,7 +287,7 @@ export default class LazyResult implements postcss.LazyResult {
         if ( opts.stringifier ) str = <any>opts.stringifier;
         if ( str.stringify )    str = <any>str.stringify;
 
-        let map  = new MapGenerator(str, this.result.root, this.result.opts);
+        let map  = new MapGenerator(str, <any>this.result.root, this.result.opts);
         let data = map.generate();
         this.result.css = data[0];
         this.result.map = data[1];

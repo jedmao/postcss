@@ -46,7 +46,7 @@ export default class Declaration extends Node implements postcss.Declaration {
      * have a clean parent and code style properties.
      */
     clone(overrides?: Object) {
-        return <Declaration>super.clone(overrides);
+        return super.clone(overrides);
     }
 
     toJSON() {

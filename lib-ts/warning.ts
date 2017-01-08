@@ -17,7 +17,7 @@ export default class Warning implements postcss.Warning {
     /**
      * The CSS node that caused the warning.
      */
-    node: Node;
+    node: postcss.Node;
 
     /**
      * The line in the input file with this warning's source.
@@ -40,7 +40,7 @@ export default class Warning implements postcss.Warning {
         options: postcss.WarningOptions = {}
     ) {
         if ( options.node && options.node.source ) {
-            let pos     = (<Node>options.node).positionBy(options);
+            let pos     = (<Node><any>options.node).positionBy(options);
             this.line   = pos.line;
             this.column = pos.column;
         }

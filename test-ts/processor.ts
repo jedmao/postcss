@@ -372,7 +372,7 @@ describe('Processor', () => {
 
             let processor = new Processor([plugin1, plugin2]);
             processor.process('a{}').then( result => {
-                expect(result.lastPlugin).to.equal(plugin2);
+                expect((<Result>result).lastPlugin).to.equal(plugin2);
                 done();
             }).catch(done);
         });

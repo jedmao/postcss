@@ -29,7 +29,7 @@ export default class Comment extends Node implements postcss.Comment {
      * have a clean parent and code style properties.
      */
     clone(overrides?: Object) {
-        return <Comment>super.clone(overrides);
+        return super.clone(overrides);
     }
 
     toJSON() {

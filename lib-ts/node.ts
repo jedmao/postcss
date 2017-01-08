@@ -48,7 +48,7 @@ export default class Node implements postcss.Node {
     /**
      * Returns the node's parent node.
      */
-    parent: Container;
+    parent: postcss.Container;
 
     /**
      * Returns the input source of the node. The property is used in source map
@@ -80,12 +80,12 @@ export default class Node implements postcss.Node {
          */
         message: string,
         options: postcss.NodeErrorOptions = {}
-    ) {
+    ): postcss.CssSyntaxError {
         if (this.source) {
             let pos = this.positionBy(options);
-            return (<Input>this.source.input).error(message, pos.line, pos.column, options);
+            return <any>(<Input>this.source.input).error(message, pos.line, pos.column, options);
         } else {
-            return new CssSyntaxError(message);
+            return <any>new CssSyntaxError(message);
         }
     }
 
@@ -99,7 +99,7 @@ export default class Node implements postcss.Node {
      * @param opts Properties to assign to the message object.
      */
     warn(
-        result: Result,
+        result: postcss.Result,
         text: string,
         opts?: postcss.WarningOptions
     ) {
@@ -141,7 +141,7 @@ export default class Node implements postcss.Node {
         for ( let name in overrides ) {
             cloned[name] = overrides[name];
         }
-        return cloned;
+        return <this>cloned;
     }
 
     /**
@@ -192,7 +192,7 @@ export default class Node implements postcss.Node {
      * @param newParent Where the current node will be moved.
      * @returns This node for chaining.
      */
-    moveTo(newParent: Container) {
+    moveTo(newParent: postcss.Container) {
         this.cleanRaws(this.root() === newParent.root());
         this.remove();
         newParent.append(this);
@@ -254,17 +254,17 @@ export default class Node implements postcss.Node {
             let value = this[name];
 
             if ( value instanceof Array ) {
-                fixed[name] = value.map( i => {
+                fixed[<string>name] = value.map( i => {
                     if ( typeof i === 'object' && i.toJSON ) {
                         return i.toJSON();
                     } else {
                         return i;
                     }
                 });
-            } else if ( typeof value === 'object' && value.toJSON ) {
-                fixed[name] = value.toJSON();
+            } else if ( typeof value === 'object' && (<any>value).toJSON ) {
+                fixed[<string>name] = (<any>value).toJSON();
             } else {
-                fixed[name] = value;
+                fixed[<string>name] = value;
             }
         }
 
@@ -289,7 +289,7 @@ export default class Node implements postcss.Node {
      * @returns The Root instance of the node's tree.
      */
     root() {
-        let result: Node = this;
+        let result: postcss.Node = this;
         while ( result.parent ) result = result.parent;
         return <Root>result;
     }

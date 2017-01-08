@@ -36,7 +36,7 @@ export default class Rule extends Container implements postcss.Rule {
      * have a clean parent and code style properties.
      */
     clone(overrides?: Object) {
-        return <Rule>super.clone(overrides);
+        return super.clone(overrides);
     }
 
     toJSON() {

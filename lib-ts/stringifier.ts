@@ -1,4 +1,5 @@
 import Node      from './node';
+import Root      from './root';
 
 const defaultRaw = {
     colon:         ': ',
@@ -118,7 +119,7 @@ class Stringifier {
 
         // Hack for first rule in CSS
         if ( detect === 'before' ) {
-            if ( !parent || parent.type === 'root' && parent.first === node ) {
+            if ( !parent || parent instanceof Root && parent.first === node ) {
                 return '';
             }
         }

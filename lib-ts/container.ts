@@ -28,7 +28,7 @@ export default class Container extends Node implements postcss.Container {
     /**
      * Contains the container's children.
      */
-    nodes: Node[];
+    nodes: postcss.Node[];
 
     /**
      * @param overrides New properties to override in the clone.
@@ -36,7 +36,7 @@ export default class Container extends Node implements postcss.Container {
      * have a clean parent and code style properties.
      */
     clone(overrides?: Object) {
-        return <Container>super.clone(overrides);
+        return super.clone(overrides);
     }
 
     toJSON() {
@@ -59,7 +59,7 @@ export default class Container extends Node implements postcss.Container {
      * if you are mutating the array of child nodes during iteration. PostCSS
      * will adjust the current index to match the mutations.
      */
-    each(callback: (node: Node, index: number) => any): boolean|void {
+    each(callback: (node: postcss.Node, index: number) => any): boolean|void {
         if ( !this.lastEach ) this.lastEach = 0;
         if ( !this.indexes ) this.indexes = { };
 
@@ -90,11 +90,11 @@ export default class Container extends Node implements postcss.Container {
      * the container's immediate children, use container.each().
      * @param callback Iterator.
      */
-    walk(callback: (node: Node, index: number) => any): boolean|void {
+    walk(callback: (node: postcss.Node, index: number) => any): boolean|void {
         return this.each( (child, i) => {
             let result = callback(child, i);
-            if ( result !== false && (<Container>child).walk ) {
-                result = (<Container>child).walk(callback);
+            if ( result !== false && child instanceof Container ) {
+                result = child.walk(callback);
             }
             return result;
         });
@@ -110,32 +110,32 @@ export default class Container extends Node implements postcss.Container {
      */
     walkDecls(
         propFilter: string|RegExp,
-        callback?: (decl: postcss.Declaration, index: number) => any
+        callback?: (decl: Declaration, index: number) => any
     ): boolean|void;
     walkDecls(
-        callback: (decl: postcss.Declaration, index: number) => any
+        callback: (decl: Declaration, index: number) => any
     ): boolean|void;
     walkDecls(
         propFilter: any,
-        callback?: (decl: postcss.Declaration, index: number) => any
+        callback?: (decl: Declaration, index: number) => any
     ): boolean|void {
         if ( !callback ) {
             callback = propFilter;
             return this.walk( (child, i) => {
-                if ( child.type === 'decl' ) {
-                    return callback(<Declaration>child, i);
+                if ( child instanceof Declaration ) {
+                    return callback(child, i);
                 }
             });
         } else if ( propFilter instanceof RegExp ) {
             return this.walk( (child, i) => {
-                if ( child.type === 'decl' && propFilter.test((<Declaration>child).prop) ) {
-                    return callback(<Declaration>child, i);
+                if ( child instanceof Declaration && propFilter.test((<Declaration>child).prop) ) {
+                    return callback(child, i);
                 }
             });
         } else {
             return this.walk( (child, i) => {
-                if ( child.type === 'decl' && (<Declaration>child).prop === propFilter ) {
-                    return callback(<Declaration>child, i);
+                if ( child instanceof Declaration && child.prop === propFilter ) {
+                    return callback(child, i);
                 }
             });
         }
@@ -152,32 +152,32 @@ export default class Container extends Node implements postcss.Container {
      */
     walkRules(
         selectorFilter: string|RegExp,
-        callback: (atRule: Rule, index: number) => any
+        callback: (atRule: postcss.Rule, index: number) => any
     ): boolean|void;
     walkRules(
-        callback: (atRule: Rule, index: number) => any
+        callback: (atRule: postcss.Rule, index: number) => any
     ): boolean|void;
     walkRules(
         selectorFilter: any,
-        callback?: (atRule: Rule, index: number) => any
+        callback?: (atRule: postcss.Rule, index: number) => any
     ): boolean|void {
         if ( !callback ) {
             callback = selectorFilter;
 
             return this.walk( (child, i) => {
-                if ( child.type === 'rule' ) {
+                if ( child instanceof Rule ) {
                     return callback(<any>child, i);
                 }
             });
         } else if ( selectorFilter instanceof RegExp ) {
             return this.walk( (child, i) => {
-                if ( child.type === 'rule' && selectorFilter.test((<Rule>child).selector) ) {
+                if ( child instanceof Rule && selectorFilter.test(child.selector) ) {
                     return callback(<any>child, i);
                 }
             });
         } else {
             return this.walk( (child, i) => {
-                if ( child.type === 'rule' && (<Rule>child).selector === selectorFilter ) {
+                if ( child instanceof Rule && child.selector === selectorFilter ) {
                     return callback(<any>child, i);
                 }
             });
@@ -195,31 +195,31 @@ export default class Container extends Node implements postcss.Container {
      */
     walkAtRules(
         nameFilter: string|RegExp,
-        callback: (atRule: AtRule, index: number) => any
+        callback: (atRule: postcss.AtRule, index: number) => any
     ): boolean|void;
     walkAtRules(
-        callback: (atRule: AtRule, index: number) => any
+        callback: (atRule: postcss.AtRule, index: number) => any
     ): boolean|void;
     walkAtRules(
         nameFilter: any,
-        callback?: (atRule: AtRule, index: number) => any
+        callback?: (atRule: postcss.AtRule, index: number) => any
     ): boolean|void {
         if ( !callback ) {
             callback = nameFilter;
             return this.walk( (child, i) => {
-                if ( child.type === 'atrule' ) {
+                if ( child instanceof AtRule ) {
                     return callback(<any>child, i);
                 }
             });
         } else if ( nameFilter instanceof RegExp ) {
             return this.walk( (child, i) => {
-                if ( child.type === 'atrule' && nameFilter.test((<AtRule>child).name) ) {
+                if ( child instanceof AtRule && nameFilter.test(child.name) ) {
                     return callback(<any>child, i);
                 }
             });
         } else {
             return this.walk( (child, i) => {
-                if ( child.type === 'atrule' && (<AtRule>child).name === nameFilter ) {
+                if ( child instanceof AtRule && child.name === nameFilter ) {
                     return callback(<any>child, i);
                 }
             });
@@ -236,8 +236,8 @@ export default class Container extends Node implements postcss.Container {
         callback: (comment: Comment, indexed: number) => any
     ): void|boolean {
         return this.walk( (child, i) => {
-            if ( child.type === 'comment' ) {
-                return callback(<any>child, i);
+            if ( child instanceof Comment ) {
+                return callback(child, i);
             }
         });
     }
@@ -260,8 +260,8 @@ export default class Container extends Node implements postcss.Container {
     append(...nodes: (Node|Object|string)[]) {
         if ( !this.nodes ) this.nodes = [];
         for ( let child of nodes ) {
-            let normalized = this.normalize(child, this.last);
-            for ( let node of normalized ) this.nodes.push(node);
+            let normalized = this.normalize(child, <any>this.last);
+            for ( let node of normalized ) this.nodes.push(<any>node);
         }
         return this;
     }
@@ -285,8 +285,8 @@ export default class Container extends Node implements postcss.Container {
         if ( !this.nodes ) this.nodes = [];
         nodes = nodes.reverse();
         for ( let child of nodes ) {
-            let normalized = this.normalize(child, this.first, 'prepend').reverse();
-            for ( let node of normalized ) this.nodes.unshift(node);
+            let normalized = this.normalize(child, <any>this.first, 'prepend').reverse();
+            for ( let node of normalized ) this.nodes.unshift(<any>node);
             for ( let id in this.indexes ) {
                 this.indexes[id] = this.indexes[id] + normalized.length;
             }
@@ -297,7 +297,7 @@ export default class Container extends Node implements postcss.Container {
     cleanRaws(keepBetween?: boolean) {
         super.cleanRaws(keepBetween);
         if ( this.nodes ) {
-            for ( let node of this.nodes ) node.cleanRaws(keepBetween);
+            for ( let node of <Node[]><any>this.nodes ) node.cleanRaws(keepBetween);
         }
     }
 
@@ -306,13 +306,13 @@ export default class Container extends Node implements postcss.Container {
      * @param oldNode Child or child's index.
      * @returns This container for chaining.
      */
-    insertBefore(oldNode: Node|number, newNode: Node|Object|string) {
+    insertBefore(oldNode: postcss.Node|number, newNode: postcss.Node|Object|string) {
         if ( !this.nodes ) this.nodes = [];
         oldNode = this.index(oldNode);
 
         let type  = oldNode === 0 ? 'prepend' : false;
-        let nodes = this.normalize(newNode, this.nodes[<number>oldNode], type).reverse();
-        for ( let node of nodes ) this.nodes.splice(<number>oldNode, 0, node);
+        let nodes = this.normalize(newNode, <any>this.nodes[<number>oldNode], type).reverse();
+        for ( let node of nodes ) this.nodes.splice(<number>oldNode, 0, <any>node);
 
         let index;
         for ( let id in this.indexes ) {
@@ -330,12 +330,12 @@ export default class Container extends Node implements postcss.Container {
      * @param oldNode Child or child's index.
      * @returns This container for chaining.
      */
-    insertAfter(oldNode: Node|number, newNode: Node|Object|string) {
+    insertAfter(oldNode: postcss.Node|number, newNode: postcss.Node|Object|string) {
         if ( !this.nodes ) this.nodes = [];
         oldNode = this.index(oldNode);
 
-        let nodes = this.normalize(newNode, this.nodes[<number>oldNode]).reverse();
-        for ( let node of nodes ) this.nodes.splice(<number>oldNode + 1, 0, node);
+        let nodes = this.normalize(newNode, <any>this.nodes[<number>oldNode]).reverse();
+        for ( let node of nodes ) this.nodes.splice(<number>oldNode + 1, 0, <any>node);
 
         let index;
         for ( let id in this.indexes ) {
@@ -368,7 +368,7 @@ export default class Container extends Node implements postcss.Container {
      * @param child Child or child's index.
      * @returns This container for chaining.
      */
-    removeChild(child: Node|number) {
+    removeChild(child: postcss.Node|number) {
         child = this.index(child);
         this.nodes[<number>child].parent = undefined;
         this.nodes.splice(<number>child, 1);
@@ -426,11 +426,11 @@ export default class Container extends Node implements postcss.Container {
             fast?: string;
         },
         callbackOrReplaceValue: string|{ (substring: string, ...args: any[]): string; }
-    ): Container;
+    ): this;
     replaceValues(
         pattern: string|RegExp,
         callbackOrReplaceValue: string|{ (substring: string, ...args: any[]): string; }
-    ): Container;
+    ): this;
     replaceValues(
         pattern: string|RegExp,
         options: any,
@@ -463,7 +463,7 @@ export default class Container extends Node implements postcss.Container {
         callback: (node: Node, index: number, nodes: Node[]) => any,
         thisArg?: any
     ): boolean {
-        return this.nodes.every(callback, thisArg);
+        return (<Node[]><any[]>this.nodes).every(callback, thisArg);
     }
 
     /**
@@ -481,14 +481,14 @@ export default class Container extends Node implements postcss.Container {
         callback: (node: Node, index: number, nodes: Node[]) => boolean,
         thisArg?: any
     ): boolean {
-        return this.nodes.some(callback, thisArg);
+        return (<Node[]><any[]>this.nodes).some(callback, thisArg);
     }
 
     /**
      * @param child Child of the current container.
      * @returns The child's index within the container's "nodes" array.
      */
-    index(child: Node|number) {
+    index(child: postcss.Node|number) {
         if ( typeof child === 'number' ) {
             return child;
         } else {
@@ -560,7 +560,7 @@ export default class Container extends Node implements postcss.Container {
                     i.raws.before = sample.raws.before.replace(/[^\s]/g, '');
                 }
             }
-            i.parent = this;
+            i.parent = <any>this;
             return i;
         });
 
@@ -584,7 +584,7 @@ export default class Container extends Node implements postcss.Container {
 
         for ( let i in node ) {
             if ( i === 'nodes' ) {
-                fix.nodes = (<Container>node).nodes.map( j => this.rebuild(j, fix) );
+                fix.nodes = (<Container>node).nodes.map( j => this.rebuild(<any>j, fix) );
             } else if ( i === 'parent' && parent ) {
                 fix.parent = parent;
             } else if ( node.hasOwnProperty(i) ) {

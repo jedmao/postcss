@@ -39,7 +39,7 @@ export default class AtRule extends Container implements postcss.AtRule {
      * have a clean parent and code style properties.
      */
     clone(overrides?: Object) {
-        return <AtRule>super.clone(overrides);
+        return super.clone(overrides);
     }
 
     toJSON() {

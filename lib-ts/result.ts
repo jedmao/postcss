@@ -39,11 +39,11 @@ export default class Result implements postcss.Result {
         /**
          * The Processor instance used for this transformation.
          */
-        public processor?: Processor,
+        public processor?: postcss.Processor,
         /**
          * Contains the Root node after all transformations.
          */
-        public root?: Root,
+        public root?: postcss.Root,
         /**
          * Options from the Processor#process(css, opts) or Root#toResult(opts) call
          * that produced this Result instance.
