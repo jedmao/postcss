@@ -2,7 +2,7 @@
   "name": "postcss",
   "version": "5.0.19",
   "description": "Tool for transforming styles with JS plugins",
-  "types": "./index.d.ts",
+  "types": "./d.ts/index.d.ts",
   "engines": {
     "node": ">=0.12"
   },
