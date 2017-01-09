@@ -63,7 +63,7 @@ export default class CssSyntaxError implements postcss.CssSyntaxError, SyntaxErr
         /**
          * Contains full error text in the GNU error format.
          */
-        message: string,
+        message: string, 
         /**
          * Contains the source line of the error. PostCSS will use the input
          * source map to detect the original error location. If you wrote a
@@ -72,7 +72,7 @@ export default class CssSyntaxError implements postcss.CssSyntaxError, SyntaxErr
          * position in PostCSS input (e.g., to debug previous compiler), use
          * error.generated.line.
          */
-        line?: number,
+        line?: number, 
         /**
          * Contains the source column of the error. PostCSS will use the input
          * source map to detect the original error location. If you wrote a
@@ -81,7 +81,7 @@ export default class CssSyntaxError implements postcss.CssSyntaxError, SyntaxErr
          * need position in PostCSS input (e.g., to debug previous compiler),
          * use error.generated.column.
          */
-        column?: number,
+        column?: number, 
         /**
          * Contains the source code of the broken file. PostCSS will use the
          * input source map to detect the original error location. If you wrote
@@ -90,7 +90,7 @@ export default class CssSyntaxError implements postcss.CssSyntaxError, SyntaxErr
          * need position in PostCSS input (e.g., to debug previous compiler),
          * use error.generated.source.
          */
-        source?: string,
+        source?: string, 
         /**
          * If parser's from option is set, contains the absolute path to the
          * broken file. PostCSS will use the input source map to detect the
@@ -100,7 +100,7 @@ export default class CssSyntaxError implements postcss.CssSyntaxError, SyntaxErr
          * PostCSS input (e.g., to debug previous compiler), use
          * error.generated.file.
          */
-        file?: string,
+        file?: string, 
         /**
          * Contains the PostCSS plugin name if the error didn't come from the
          * CSS parser.
@@ -121,5 +121,5 @@ export default class CssSyntaxError implements postcss.CssSyntaxError, SyntaxErr
      * @returns Error position, message and source code of broken part.
      */
     toString(): string;
-    generated: postcss.InputOrigin;
+    readonly generated: postcss.InputOrigin;
 }

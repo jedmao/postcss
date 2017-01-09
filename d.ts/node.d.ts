@@ -1,7 +1,4 @@
-import Container from './container';
-import CssSyntaxError from './css-syntax-error';
 import postcss from './postcss';
-import Result from './result';
 export default class Node implements postcss.Node {
     /**
      * Returns a string representing the node's type. Possible values are
@@ -16,7 +13,7 @@ export default class Node implements postcss.Node {
     /**
      * Returns the node's parent node.
      */
-    parent: Container;
+    parent: postcss.Container;
     /**
      * Returns the input source of the node. The property is used in source map
      * generation. If you create a node manually (e.g., with postcss.decl() ),
@@ -39,7 +36,7 @@ export default class Node implements postcss.Node {
         /**
          * Error description.
          */
-        message: string, options?: postcss.NodeErrorOptions): CssSyntaxError;
+        message: string, options?: postcss.NodeErrorOptions): postcss.CssSyntaxError;
     /**
      * Creates an instance of Warning and adds it to messages. This method is
      * provided as a convenience wrapper for Result#warn.
@@ -49,7 +46,7 @@ export default class Node implements postcss.Node {
      * the message object.
      * @param opts Properties to assign to the message object.
      */
-    warn(result: Result, text: string, opts?: postcss.WarningOptions): void;
+    warn(result: postcss.Result, text: string, opts?: postcss.WarningOptions): void;
     /**
      * Removes the node from its parent and cleans the parent property in the
      * node and its children.
@@ -65,21 +62,21 @@ export default class Node implements postcss.Node {
      * @returns A clone of this node. The node and its (cloned) children will
      * have a clean parent and code style properties.
      */
-    clone(overrides?: Object): Node;
+    clone(overrides?: Object): this;
     /**
      * Shortcut to clone the node and insert the resulting cloned node before
      * the current node.
      * @param overrides New Properties to override in the clone.
      * @returns The cloned node.
      */
-    cloneBefore(overrides?: Object): Node;
+    cloneBefore(overrides?: Object): this;
     /**
      * Shortcut to clone the node and insert the resulting cloned node after
      * the current node.
      * @param overrides New Properties to override in the clone.
      * @returns The cloned node.
      */
-    cloneAfter(overrides?: Object): Node;
+    cloneAfter(overrides?: Object): this;
     /**
      * Inserts node(s) before the current node and removes the current node.
      * @returns This node for chaining.
@@ -93,7 +90,7 @@ export default class Node implements postcss.Node {
      * @param newParent Where the current node will be moved.
      * @returns This node for chaining.
      */
-    moveTo(newParent: Container): this;
+    moveTo(newParent: postcss.Container): this;
     /**
      * Removes the node from its current parent and inserts it into a new
      * parent before otherNode. This will also clean the node's code style
@@ -114,12 +111,12 @@ export default class Node implements postcss.Node {
      * @returns The next child of the node's parent; or, returns undefined if
      * the current node is the last child.
      */
-    next(): Node;
+    next(): any;
     /**
      * @returns The previous child of the node's parent; or, returns undefined
      * if the current node is the first child.
      */
-    prev(): Node;
+    prev(): any;
     toJSON(): postcss.JsonNode;
     /**
      * @param prop Name or code style property.

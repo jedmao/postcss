@@ -32,7 +32,7 @@ export default class Input implements postcss.Input {
      * The CSS source identifier. Contains input.file if the user set the "from"
      * option, or input.id if they did not.
      */
-    from: string;
+    readonly from: string;
     error(message: string, line: number, column: number, opts?: {
         plugin?: string;
     }): CssSyntaxError;

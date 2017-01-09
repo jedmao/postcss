@@ -21,7 +21,7 @@ export default class Comment extends Node implements postcss.Comment {
      * @returns A clone of this node. The node and its (cloned) children will
      * have a clean parent and code style properties.
      */
-    clone(overrides?: Object): any;
+    clone(overrides?: Object): this;
     toJSON(): postcss.JsonComment;
     left: string;
     right: string;

@@ -1,8 +1,7 @@
+import Declaration from './declaration';
 import Comment from './comment';
 import postcss from './postcss';
-import AtRule from './at-rule';
 import Node from './node';
-import Rule from './rule';
 /**
  * Containers can store any content. If you write a rule inside a rule,
  * PostCSS will parse it.
@@ -13,13 +12,13 @@ export default class Container extends Node implements postcss.Container {
     /**
      * Contains the container's children.
      */
-    nodes: Node[];
+    nodes: postcss.Node[];
     /**
      * @param overrides New properties to override in the clone.
      * @returns A clone of this node. The node and its (cloned) children will
      * have a clean parent and code style properties.
      */
-    clone(overrides?: Object): any;
+    clone(overrides?: Object): this;
     toJSON(): postcss.JsonContainer;
     push(child: any): this;
     /**
@@ -32,7 +31,7 @@ export default class Container extends Node implements postcss.Container {
      * if you are mutating the array of child nodes during iteration. PostCSS
      * will adjust the current index to match the mutations.
      */
-    each(callback: (node: Node, index: number) => any): boolean | void;
+    each(callback: (node: postcss.Node, index: number) => any): boolean | void;
     /**
      * Traverses the container's descendant nodes, calling `callback` for each
      * node. Like container.each(), this method is safe to use if you are
@@ -40,7 +39,7 @@ export default class Container extends Node implements postcss.Container {
      * the container's immediate children, use container.each().
      * @param callback Iterator.
      */
-    walk(callback: (node: Node, index: number) => any): boolean | void;
+    walk(callback: (node: postcss.Node, index: number) => any): boolean | void;
     /**
      * Traverses the container's descendant nodes, calling `callback` for each
      * declaration. Like container.each(), this method is safe to use if you
@@ -49,8 +48,8 @@ export default class Container extends Node implements postcss.Container {
      * declarations whose property matches propFilter will be iterated over.
      * @param callback Called for each declaration node within the container.
      */
-    walkDecls(propFilter: string | RegExp, callback?: (decl: postcss.Declaration, index: number) => any): boolean | void;
-    walkDecls(callback: (decl: postcss.Declaration, index: number) => any): boolean | void;
+    walkDecls(propFilter: string | RegExp, callback?: (decl: Declaration, index: number) => any): boolean | void;
+    walkDecls(callback: (decl: Declaration, index: number) => any): boolean | void;
     /**
      * Traverses the container's descendant nodes, calling `callback` for each
      * rule. Like container.each(), this method is safe to use if you are
@@ -60,8 +59,8 @@ export default class Container extends Node implements postcss.Container {
      * @param callback Iterator called for each rule node within the
      * container.
      */
-    walkRules(selectorFilter: string | RegExp, callback: (atRule: Rule, index: number) => any): boolean | void;
-    walkRules(callback: (atRule: Rule, index: number) => any): boolean | void;
+    walkRules(selectorFilter: string | RegExp, callback: (atRule: postcss.Rule, index: number) => any): boolean | void;
+    walkRules(callback: (atRule: postcss.Rule, index: number) => any): boolean | void;
     /**
      * Traverses the container's descendant nodes, calling `callback` for each
      * at-rule. Like container.each(), this method is safe to use if you are
@@ -71,8 +70,8 @@ export default class Container extends Node implements postcss.Container {
      * @param callback Iterator called for each at-rule node within the
      * container.
      */
-    walkAtRules(nameFilter: string | RegExp, callback: (atRule: AtRule, index: number) => any): boolean | void;
-    walkAtRules(callback: (atRule: AtRule, index: number) => any): boolean | void;
+    walkAtRules(nameFilter: string | RegExp, callback: (atRule: postcss.AtRule, index: number) => any): boolean | void;
+    walkAtRules(callback: (atRule: postcss.AtRule, index: number) => any): boolean | void;
     /**
      * Traverses the container's descendant nodes, calling `callback` for each
      * commennt. Like container.each(), this method is safe to use if you are
@@ -118,13 +117,13 @@ export default class Container extends Node implements postcss.Container {
      * @param oldNode Child or child's index.
      * @returns This container for chaining.
      */
-    insertBefore(oldNode: Node | number, newNode: Node | Object | string): this;
+    insertBefore(oldNode: postcss.Node | number, newNode: postcss.Node | Object | string): this;
     /**
      * Insert newNode after oldNode within the container.
      * @param oldNode Child or child's index.
      * @returns This container for chaining.
      */
-    insertAfter(oldNode: Node | number, newNode: Node | Object | string): this;
+    insertAfter(oldNode: postcss.Node | number, newNode: postcss.Node | Object | string): this;
     /**
      * Removes the container from its parent and cleans the parent property in the
      * container and its children.
@@ -137,7 +136,7 @@ export default class Container extends Node implements postcss.Container {
      * @param child Child or child's index.
      * @returns This container for chaining.
      */
-    removeChild(child: Node | number): this;
+    removeChild(child: postcss.Node | number): this;
     /**
      * Removes all children from the container and cleans their parent
      * properties.
@@ -173,10 +172,10 @@ export default class Container extends Node implements postcss.Container {
         fast?: string;
     }, callbackOrReplaceValue: string | {
         (substring: string, ...args: any[]): string;
-    }): Container;
+    }): this;
     replaceValues(pattern: string | RegExp, callbackOrReplaceValue: string | {
         (substring: string, ...args: any[]): string;
-    }): Container;
+    }): this;
     /**
      * Determines whether all child nodes satisfy the specified test.
      * @param callback A function that accepts up to three arguments. The
@@ -202,15 +201,15 @@ export default class Container extends Node implements postcss.Container {
      * @param child Child of the current container.
      * @returns The child's index within the container's "nodes" array.
      */
-    index(child: Node | number): number;
+    index(child: postcss.Node | number): number;
     /**
      * @returns The container's first child.
      */
-    first: Node;
+    readonly first: postcss.Node;
     /**
      * @returns The container's last child.
      */
-    last: Node;
+    readonly last: postcss.Node;
     protected normalize(node: Node | string, sample?: Node, type?: string | boolean): Node[];
     protected normalize(props: postcss.AtRuleNewProps | postcss.RuleNewProps | postcss.DeclarationNewProps | postcss.CommentNewProps, sample?: Node, type?: string | boolean): Node[];
     rebuild(node: Node, parent?: Container): any;

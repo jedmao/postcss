@@ -1,5 +1,4 @@
 import postcss from './postcss';
-import Node from './node';
 export default class Warning implements postcss.Warning {
     /**
      * Contains the warning message.
@@ -18,7 +17,7 @@ export default class Warning implements postcss.Warning {
     /**
      * The CSS node that caused the warning.
      */
-    node: Node;
+    node: postcss.Node;
     /**
      * The line in the input file with this warning's source.
      */

@@ -1,15 +1,13 @@
-import Processor from './processor';
 import postcss from './postcss';
-import Root from './root';
 export default class Result implements postcss.Result {
     /**
      * The Processor instance used for this transformation.
      */
-    processor: Processor;
+    processor: postcss.Processor;
     /**
      * Contains the Root node after all transformations.
      */
-    root: Root;
+    root: postcss.Root;
     /**
      * Options from the Processor#process(css, opts) or Root#toResult(opts) call
      * that produced this Result instance.
@@ -44,11 +42,11 @@ export default class Result implements postcss.Result {
         /**
          * The Processor instance used for this transformation.
          */
-        processor?: Processor,
+        processor?: postcss.Processor, 
         /**
          * Contains the Root node after all transformations.
          */
-        root?: Root,
+        root?: postcss.Root, 
         /**
          * Options from the Processor#process(css, opts) or Root#toResult(opts) call
          * that produced this Result instance.
@@ -71,5 +69,5 @@ export default class Result implements postcss.Result {
     /**
      * Alias for css property to use with syntaxes that generate non-CSS output.
      */
-    content: string;
+    readonly content: string;
 }

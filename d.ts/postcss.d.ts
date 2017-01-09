@@ -8,7 +8,7 @@ import _list from './list';
  */
 declare function postcss(plugins?: (typeof postcss.acceptedPlugin)[]): postcss.Processor;
 declare function postcss(...plugins: (typeof postcss.acceptedPlugin)[]): postcss.Processor;
-declare module postcss {
+declare namespace postcss {
     var acceptedPlugin: Plugin<any> | Transformer | {
         postcss: TransformCallback | Processor;
     } | Processor;
@@ -319,7 +319,7 @@ declare module postcss {
         /**
          * Contains the Root node after all transformations.
          */
-        root: Root;
+        root?: Root;
         /**
          * Contains messages from plugins (e.g., warnings or custom messages).
          * Add a warning using Result#warn() and get all warnings
@@ -329,12 +329,12 @@ declare module postcss {
         /**
          * The Processor instance used for this transformation.
          */
-        processor: Processor;
+        processor?: Processor;
         /**
          * Options from the Processor#process(css, opts) or Root#toResult(opts) call
          * that produced this Result instance.
          */
-        opts: ResultOptions;
+        opts?: ResultOptions;
     }
     interface ResultOptions extends ProcessOptions {
         /**
@@ -621,32 +621,32 @@ declare module postcss {
          * node and its children.
          * @returns This node for chaining.
          */
-        remove(): Node;
+        remove(): this;
         /**
          * Inserts node(s) before the current node and removes the current node.
          * @returns This node for chaining.
          */
-        replaceWith(...nodes: (Node | Object)[]): Node;
+        replaceWith(...nodes: (Node | Object)[]): this;
         /**
          * @param overrides New properties to override in the clone.
          * @returns A clone of this node. The node and its (cloned) children will
          * have a clean parent and code style properties.
          */
-        clone(overrides?: Object): Node;
+        clone(overrides?: Object): this;
         /**
          * Shortcut to clone the node and insert the resulting cloned node before
          * the current node.
          * @param overrides New Properties to override in the clone.
          * @returns The cloned node.
          */
-        cloneBefore(overrides?: Object): Node;
+        cloneBefore(overrides?: Object): this;
         /**
          * Shortcut to clone the node and insert the resulting cloned node after
          * the current node.
          * @param overrides New Properties to override in the clone.
          * @returns The cloned node.
          */
-        cloneAfter(overrides?: Object): Node;
+        cloneAfter(overrides?: Object): this;
         /**
          * Removes the node from its current parent and inserts it at the end of
          * newParent. This will clean the before and after code style properties
@@ -655,7 +655,7 @@ declare module postcss {
          * @param newParent Where the current node will be moved.
          * @returns This node for chaining.
          */
-        moveTo(newParent: Container): Node;
+        moveTo(newParent: Container): this;
         /**
          * Removes the node from its current parent and inserts it into a new
          * parent before otherNode. This will also clean the node's code style
@@ -663,7 +663,7 @@ declare module postcss {
          * @param otherNode Will be after the current node after moving.
          * @returns This node for chaining.
          */
-        moveBefore(otherNode: Node): Node;
+        moveBefore(otherNode: Node): this;
         /**
          * Removes the node from its current parent and inserts it into a new
          * parent after otherNode. This will also clean the node's code style
@@ -671,7 +671,7 @@ declare module postcss {
          * @param otherNode Will be before the current node after moving.
          * @returns This node for chaining.
          */
-        moveAfter(otherNode: Node): Node;
+        moveAfter(otherNode: Node): this;
         /**
          * @param prop Name or code style property.
          * @param defaultType Name of default value. It can be easily missed if the
@@ -808,7 +808,7 @@ declare module postcss {
          * @returns A clone of this node. The node and its (cloned) children will
          * have a clean parent and code style properties.
          */
-        clone(overrides?: Object): Container;
+        clone(overrides?: Object): this;
         /**
          * @param child Child of the current container.
          * @returns The child's index within the container's "nodes" array.
@@ -924,10 +924,10 @@ declare module postcss {
             fast?: string;
         }, callbackOrReplaceValue: string | {
             (substring: string, ...args: any[]): string;
-        }): Container;
+        }): this;
         replaceValues(pattern: string | RegExp, callbackOrReplaceValue: string | {
             (substring: string, ...args: any[]): string;
-        }): Container;
+        }): this;
         /**
          * Inserts new nodes to the beginning of the container.
          * Because each node class is identifiable by unique properties, use the
@@ -943,7 +943,7 @@ declare module postcss {
          * @param nodes New nodes.
          * @returns This container for chaining.
          */
-        prepend(...nodes: (Node | Object | string)[]): Container;
+        prepend(...nodes: (Node | Object | string)[]): this;
         /**
          * Inserts new nodes to the end of the container.
          * Because each node class is identifiable by unique properties, use the
@@ -959,38 +959,38 @@ declare module postcss {
          * @param nodes New nodes.
          * @returns This container for chaining.
          */
-        append(...nodes: (Node | Object | string)[]): Container;
+        append(...nodes: (Node | Object | string)[]): this;
         /**
          * Insert newNode before oldNode within the container.
          * @param oldNode Child or child's index.
          * @returns This container for chaining.
          */
-        insertBefore(oldNode: Node | number, newNode: Node | Object | string): Container;
+        insertBefore(oldNode: Node | number, newNode: Node | Object | string): this;
         /**
          * Insert newNode after oldNode within the container.
          * @param oldNode Child or child's index.
          * @returns This container for chaining.
          */
-        insertAfter(oldNode: Node | number, newNode: Node | Object | string): Container;
+        insertAfter(oldNode: Node | number, newNode: Node | Object | string): this;
         /**
          * Removes the container from its parent and cleans the parent property in the
          * container and its children.
          * @returns This container for chaining.
          */
-        remove(): Container;
+        remove(): this;
         /**
          * Removes child from the container and cleans the parent properties
          * from the node and its children.
          * @param child Child or child's index.
          * @returns This container for chaining.
          */
-        removeChild(child: Node | number): Container;
+        removeChild(child: Node | number): this;
         /**
          * Removes all children from the container and cleans their parent
          * properties.
          * @returns This container for chaining.
          */
-        removeAll(): Container;
+        removeAll(): this;
     }
     interface ContainerNewProps extends NodeNewProps {
         /**
@@ -1029,7 +1029,7 @@ declare module postcss {
          * @returns A clone of this node. The node and its (cloned) children will
          * have a clean parent and code style properties.
          */
-        clone(overrides?: Object): Root;
+        clone(overrides?: Object): this;
         /**
          * @returns A Result instance representing the root's CSS.
          */
@@ -1044,14 +1044,14 @@ declare module postcss {
         /**
          * Deprecated. Use Root#removeChild.
          */
-        remove(child?: Node | number): Root;
+        remove(child?: Node | number): this;
         /**
          * Removes child from the root node, and the parent properties of node and
          * its children.
          * @param child Child or child's index.
          * @returns This root node for chaining.
          */
-        removeChild(child: Node | number): Root;
+        removeChild(child: Node | number): this;
     }
     interface RootNewProps extends ContainerNewProps {
     }
@@ -1076,7 +1076,7 @@ declare module postcss {
          * @returns A clone of this node. The node and its (cloned) children will
          * have a clean parent and code style properties.
          */
-        clone(overrides?: Object): AtRule;
+        clone(overrides?: Object): this;
     }
     interface AtRuleNewProps extends ContainerNewProps {
         /**
@@ -1127,7 +1127,7 @@ declare module postcss {
          * @returns A clone of this node. The node and its (cloned) children will
          * have a clean parent and code style properties.
          */
-        clone(overrides?: Object): Rule;
+        clone(overrides?: Object): this;
     }
     interface RuleNewProps extends ContainerNewProps {
         /**
@@ -1185,7 +1185,7 @@ declare module postcss {
          * @returns A clone of this node. The node and its (cloned) children will
          * have a clean parent and code style properties.
          */
-        clone(overrides?: Object): Declaration;
+        clone(overrides?: Object): this;
     }
     interface DeclarationNewProps {
         /**
@@ -1231,7 +1231,7 @@ declare module postcss {
          * @returns A clone of this node. The node and its (cloned) children will
          * have a clean parent and code style properties.
          */
-        clone(overrides?: Object): Comment;
+        clone(overrides?: Object): this;
     }
     interface CommentNewProps {
         /**

@@ -25,7 +25,7 @@ export default class Rule extends Container implements postcss.Rule {
      * @returns A clone of this node. The node and its (cloned) children will
      * have a clean parent and code style properties.
      */
-    clone(overrides?: Object): Rule;
+    clone(overrides?: Object): this;
     toJSON(): postcss.JsonRule;
     /**
      * @returns An array containing the rule's individual selectors.

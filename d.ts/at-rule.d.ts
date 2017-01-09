@@ -30,7 +30,7 @@ export default class AtRule extends Container implements postcss.AtRule {
      * @returns A clone of this node. The node and its (cloned) children will
      * have a clean parent and code style properties.
      */
-    clone(overrides?: Object): AtRule;
+    clone(overrides?: Object): this;
     toJSON(): postcss.JsonAtRule;
     append(...children: any[]): this;
     prepend(...children: any[]): this;

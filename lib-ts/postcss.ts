@@ -27,7 +27,7 @@ function postcss(...plugins: any[]): postcss.Processor {
 }
 
 // ReSharper disable once InconsistentNaming
-module postcss {
+namespace postcss {
 
     export var acceptedPlugin: Plugin<any>|Transformer|{ postcss: TransformCallback|Processor }|Processor;
 

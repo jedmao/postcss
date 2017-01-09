@@ -21,7 +21,7 @@ export default class Root extends Container implements postcss.Root {
      * @returns A clone of this node. The node and its (cloned) children will
      * have a clean parent and code style properties.
      */
-    clone(overrides?: Object): Root;
+    clone(overrides?: Object): this;
     toJSON(): postcss.JsonRoot;
     /**
      * Removes child from the root node, and the parent properties of node and
@@ -46,7 +46,7 @@ export default class Root extends Container implements postcss.Root {
     /**
      * Deprecated. Use Root#removeChild.
      */
-    remove(child?: Node | number): Root;
+    remove(child?: Node | number): this;
     /**
      * Deprecated. Use Root#source.input.map.
      */
